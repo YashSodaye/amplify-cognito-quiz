@@ -1,57 +1,33 @@
-import React, { useState } from 'react';
-
+import React, { useState , useEffect } from 'react';
+import ExpenseForm from './ExpenseForm';
+import ExpenseList from './ExpenseList';
+    
 function BudgetTracker() {
-  const [items, setItems] = useState([]);
-  const [itemName, setItemName] = useState('');
-  const [itemAmount, setItemAmount] = useState('');
-  const [totalExpense, setTotalExpense] = useState(0);
+  const [expenses, setExpenses] = useState([]);
 
-  const handleAddItem = () => {
-    if (itemName.trim() !== '' && !isNaN(itemAmount) && itemAmount > 0) {
-      const newItem = {
-        name: itemName,
-        amount: parseFloat(itemAmount)
-      };
-      setItems([...items, newItem]);
-      setTotalExpense(totalExpense + parseFloat(itemAmount));
-      setItemName('');
-      setItemAmount('');
-    } else {
-      alert('Please enter valid item name and amount!');
-    }
+  useEffect (() => {
+    const storedExpenses = JSON.parse(localStorage.getItem('expenses')) || [];
+    setExpenses(storedExpenses);
+  }, []);
+
+  const addExpense = (expense) => {
+    const updatedExpenses = [...expenses, expense];
+    setExpenses(updatedExpenses);
+    localStorage.setItem('expenses', JSON.stringify(updatedExpenses));
+  };
+
+  const deleteExpense = (index) => {
+    const updatedExpenses = [...expenses];
+    updatedExpenses.splice(index, 1);
+    setExpenses(updatedExpenses);
+    localStorage.setItem('expenses', JSON.stringify(updatedExpenses));
   };
 
   return (
-    <div className='budget-tracker'>
-      <h2>Budget Tracker</h2>
-      <div className='expense-form'>
-        <input
-          type='text'
-          placeholder='Item Name'
-          value={itemName}
-          onChange={(e) => setItemName(e.target.value)}
-        />
-        <input
-          type='number'
-          placeholder='Amount'
-          value={itemAmount}
-          onChange={(e) => setItemAmount(e.target.value)}
-        />
-        <button onClick={handleAddItem}>Add Expense</button>
-      </div>
-      <div className='expense-list'>
-        <h3>Expense List</h3>
-        <ul>
-          {items.map((item, index) => (
-            <li key={index}>
-              {item.name}: ${item.amount}
-            </li>
-          ))}
-        </ul>
-        <div className='total-expense'>
-          <strong>Total Expense:</strong> ${totalExpense}
-        </div>
-      </div>
+    <div className="container">
+      <h1 className="my-4 text-center movingTitle" style={{ color: '#ffff07' }}>Budget Tracker</h1>
+      <ExpenseForm addExpense={addExpense} />
+      <ExpenseList expenses={expenses} deleteExpense={deleteExpense} />
     </div>
   );
 }
